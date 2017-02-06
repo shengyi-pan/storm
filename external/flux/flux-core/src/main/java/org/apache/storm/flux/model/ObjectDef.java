@@ -17,7 +17,7 @@
  */
 package org.apache.storm.flux.model;
 
-import backtype.storm.Config;
+import org.apache.storm.Config;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -53,8 +53,11 @@ public class ObjectDef {
         for(Object obj : constructorArgs){
             if(obj instanceof LinkedHashMap){
                 Map map = (Map)obj;
-                if(map.containsKey("ref") && map.size() == 1){
-                    newVal.add(new BeanReference((String)map.get("ref")));
+                if(map.containsKey("ref") && map.size() == 1) {
+                    newVal.add(new BeanReference((String) map.get("ref")));
+                    this.hasReferences = true;
+                } else if (map.containsKey("reflist") && map.size() == 1) {
+                    newVal.add(new BeanListReference((List<String>) map.get("reflist")));
                     this.hasReferences = true;
                 } else {
                     newVal.add(obj);

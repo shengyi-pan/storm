@@ -17,8 +17,8 @@
  */
 package org.apache.storm.flux;
 
-import backtype.storm.Config;
-import backtype.storm.generated.StormTopology;
+import org.apache.storm.Config;
+import org.apache.storm.generated.StormTopology;
 import org.apache.storm.flux.model.ExecutionContext;
 import org.apache.storm.flux.model.TopologyDef;
 import org.apache.storm.flux.parser.FluxParser;
@@ -43,6 +43,16 @@ public class TCKTest {
     @Test
     public void testShellComponents() throws Exception {
         TopologyDef topologyDef = FluxParser.parseResource("/configs/shell_test.yaml", false, true, null, false);
+        Config conf = FluxBuilder.buildConfig(topologyDef);
+        ExecutionContext context = new ExecutionContext(topologyDef, conf);
+        StormTopology topology = FluxBuilder.buildTopology(context);
+        assertNotNull(topology);
+        topology.validate();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testBadShellComponents() throws Exception {
+        TopologyDef topologyDef = FluxParser.parseResource("/configs/bad_shell_test.yaml", false, true, null, false);
         Config conf = FluxBuilder.buildConfig(topologyDef);
         ExecutionContext context = new ExecutionContext(topologyDef, conf);
         StormTopology topology = FluxBuilder.buildTopology(context);
@@ -217,6 +227,7 @@ public class TCKTest {
         assertTrue(bolt.getFoo().equals("foo"));
         assertTrue(bolt.getBar().equals("bar"));
         assertTrue(bolt.getFooBar().equals("foobar"));
+        assertArrayEquals(new TestBolt.TestClass[] {new TestBolt.TestClass("foo"), new TestBolt.TestClass("bar"), new TestBolt.TestClass("baz")}, bolt.getClasses());
     }
 
     @Test
